@@ -25,11 +25,12 @@ from tvm import relay
 @tvm.tir.transform.prim_func_pass(opt_level=2)
 class VanillaAcceleratorConv2dPass:
     _EXTERNAL_FUNCTION_NAME = "vanilla_accelerator_conv2dnchw"
-    _TVM_BLOCK_MATCH_NAME = "conv2d_nchw"
+    _TVM_BLOCK_MATCH_NAME = "compute_2"
 
     def transform_function(
         self, func: tvm.tir.PrimFunc, mod: tvm.ir.IRModule, ctx: tvm.ir.transform.PassContext
     ) -> tvm.tir.PrimFunc:
+        print(func)
         return self._vanilla_accelerator_conv2d_pass(func, mod, ctx)
 
     @classmethod
@@ -37,6 +38,7 @@ class VanillaAcceleratorConv2dPass:
         _loops = dict()
         _handles = []
         _entry_node = None
+        stores = []
 
         def _has_block(name: str, func: tvm.tir.PrimFunc) -> bool:
             """
@@ -64,18 +66,32 @@ class VanillaAcceleratorConv2dPass:
                         assert v.min.value == 0
                     offset_order = ["co", "w", "h", "ci", "kh", "kw"]
                     offsets = [_loops[i].extent.value for i in offset_order]
+
+                    offsets.append(stores[0])
+                    offsets.append(stores[3])
+                    print(offsets)
+
                     args = buffers + offsets
                     irb.emit(tir_call(irb, True, cls._EXTERNAL_FUNCTION_NAME, *args))
                     irb_result = irb.get()
                     return irb_result
                 elif isinstance(op, tvm.tir.SeqStmt):
                     # Remove that pad block of TOPI's conv2DNCHW by only returning the 2nd statement
-                    return op.seq[1]
+                    return op.seq[5]
                 return op
 
             sch = tir.Schedule(func)
 
             if _has_block(cls._TVM_BLOCK_MATCH_NAME, func):
+
+                def _visit(s):
+                    if isinstance(s, tvm.tir.BufferStore):
+                        stores.append(s.value)
+
+                tvm.tir.stmt_functor.post_order_visit(func.body, _visit)
+                
+                print(stores[0], stores[3])
+
                 conv2d_block = sch.get_block(cls._TVM_BLOCK_MATCH_NAME)
                 rv_loops = sch.get_loops(conv2d_block)
                 assert len(rv_loops) == 7
@@ -137,14 +153,14 @@ def tir_call(ib: tvm.tir.ir_builder, extern: bool, name: str, *args):
         return tvm.tir.call_packed(name, *args)
 
 
-
 @tvm.ir.transform.module_pass(opt_level=0)
 class ConvertLayout:
-    
+    print("relay pass")
     def transform_module(self, mod, ctx):
-        
+        print("before convert layout")
+        print(mod)
         # My pass functionality...
-        desired_layouts = {'nn.conv2d': ['NCHW', 'default']}
+        desired_layouts = {'qnn.conv2d': ['NCHW', 'default']}
         # Convert the layout to NCHW
         # RemoveUnunsedFunctions is used to clean up the graph.
         seq = tvm.transform.Sequential([relay.transform.RemoveUnusedFunctions(),
@@ -152,4 +168,6 @@ class ConvertLayout:
         with tvm.transform.PassContext(opt_level=3):
             mod = seq(mod)
         
+        print("after convert layout")
+        print(mod)
         return mod

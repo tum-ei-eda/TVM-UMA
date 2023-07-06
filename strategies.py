@@ -37,10 +37,9 @@ from tvm.relay import op as _op
 from tvm.relay.qnn.strategy.hexagon import *
 from tvm import topi
 
-
 @relay.op.strategy.override_native_generic_func("qnn_conv2d_strategy")
 def qnn_conv2d_strategy(attrs, inputs, out_type, target):
-    print("qnn strategy")    
+    print("qnn strategy")
     strategy = _op.OpStrategy()
     strategy.add_implementation(
         wrap_topi_qnn_conv2d(topi.hexagon.qnn_conv2d),
@@ -48,3 +47,5 @@ def qnn_conv2d_strategy(attrs, inputs, out_type, target):
     )
     
     return strategy
+
+

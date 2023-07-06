@@ -14,16 +14,18 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-"""UMA backend for the vanilla_accelerator accelerator"""
-from passes import VanillaAcceleratorConv2dPass, ConvertLayout
+"""UMA backend for the q_vanilla_accelerator accelerator"""
+from passes import QVanillaAcceleratorConv2dPass, ConvertLayout, Canonicalize
+#, ConvertLayout, Canonicalize, QVanillaAcceleratorDensePass
 from tvm.relay.backend.contrib.uma.api.utils import PassPhase
 from tvm.relay.backend.contrib.uma.backend import UMABackend
 from codegen import gen_includes
-from patterns import conv2d_pattern
+from patterns import conv2d_pattern, dense_pattern, qnn_conv2d_add_pattern, qnn_conv2d_pattern
+from strategies import qnn_conv2d_strategy
 
 
-class VanillaAcceleratorBackend(UMABackend):
-    """UMA backend for the VanillaAccelerator accelerator."""
+class QVanillaAcceleratorBackend(UMABackend):
+    """UMA backend for the QVanillaAccelerator accelerator."""
 
     def __init__(self):
         super().__init__()
@@ -32,17 +34,27 @@ class VanillaAcceleratorBackend(UMABackend):
         self._register_target_attr("dimension")
 
         # Relay Pattern registration
-        self._register_pattern("conv2d", conv2d_pattern())
+        # self._register_pattern("qnn_conv2d", qnn_conv2d_pattern())
+        # self._register_pattern("conv2d", conv2d_pattern())
+        self._register_pattern("qnn_conv2d_add", qnn_conv2d_add_pattern())
+
+        # self._register_pattern("dense", dense_pattern())
 
         # Relay to Relay function registration
         self._register_relay_pass(PassPhase.PRE_PARTITIONING, ConvertLayout())
 
+        self._register_relay_pass(PassPhase.POST_PARTITIONING_0, Canonicalize())
+
         # Relay to TIR function registration
-        self._register_tir_pass(PassPhase.TIR_PHASE_0, VanillaAcceleratorConv2dPass())
+        self._register_operator_strategy("qnn.conv2d", qnn_conv2d_strategy)
+
+        self._register_tir_pass(PassPhase.TIR_PHASE_0, QVanillaAcceleratorConv2dPass())
+
+        # self._register_tir_pass(PassPhase.TIR_PHASE_0, QVanillaAcceleratorDensePass())
 
         # TIR to runtime function registration
         self._register_codegen(fmt="c", includes=gen_includes)
 
     @property
     def target_name(self):
-        return "vanilla_accelerator"
+        return "q_vanilla_accelerator"

@@ -1,5 +1,5 @@
 # TVM-UMA
-This repository was added to test the UMA functionality. 
+This repository was added to test the UMA functionality..
 
 There are the code structure for integration of Vanilla accelerator into TVM backends as well as the python codes for running three examples:
 1. Conv2D (run_conv2d.py)

@@ -16,11 +16,10 @@
 # under the License.
 """UMA backend for the q_vanilla_accelerator accelerator"""
 from passes import VanillaAcceleratorConv2dPass, ConvertLayout
-#, ConvertLayout, Canonicalize, QVanillaAcceleratorDensePass
 from tvm.relay.backend.contrib.uma.api.utils import PassPhase
 from tvm.relay.backend.contrib.uma.backend import UMABackend
 from codegen import gen_includes
-from patterns import conv2d_pattern, dense_pattern, qnn_conv2d_add_pattern
+from patterns import qnn_conv2d_add_pattern
 from strategies import qnn_conv2d_strategy
 
 
@@ -34,11 +33,7 @@ class VanillaAcceleratorBackend(UMABackend):
         self._register_target_attr("dimension")
 
         # Relay Pattern registration
-        # self._register_pattern("qnn_conv2d", qnn_conv2d_pattern())
-        # self._register_pattern("conv2d", conv2d_pattern())
         self._register_pattern("qnn_conv2d_add", qnn_conv2d_add_pattern())
-
-        # self._register_pattern("dense", dense_pattern())
 
         # Relay to Relay function registration
         self._register_relay_pass(PassPhase.PRE_PARTITIONING, ConvertLayout())
@@ -49,7 +44,6 @@ class VanillaAcceleratorBackend(UMABackend):
 
         self._register_tir_pass(PassPhase.TIR_PHASE_0, VanillaAcceleratorConv2dPass())
 
-        # self._register_tir_pass(PassPhase.TIR_PHASE_0, VanillaAcceleratorDensePass())
 
         # TIR to runtime function registration
         self._register_codegen(fmt="c", includes=gen_includes)

@@ -14,7 +14,7 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-"""Strategies for the vanilla_accelerator accelerator"""
+"""Strategies for the q_vanilla_accelerator accelerator"""
 
 # Example how to integrate a custom conv1d strategy:
 
@@ -37,6 +37,8 @@ from tvm.relay import op as _op
 from tvm.relay.qnn.strategy.hexagon import *
 from tvm import topi
 
+
+
 @relay.op.strategy.override_native_generic_func("qnn_conv2d_strategy")
 def qnn_conv2d_strategy(attrs, inputs, out_type, target):
     print("qnn strategy")
@@ -47,5 +49,4 @@ def qnn_conv2d_strategy(attrs, inputs, out_type, target):
     )
     
     return strategy
-
 

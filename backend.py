@@ -15,18 +15,19 @@
 # specific language governing permissions and limitations
 # under the License.
 """UMA backend for the q_vanilla_accelerator accelerator"""
-from passes import VanillaAcceleratorConv2dPass, ConvertLayout
+from .passes import QVanillaAcceleratorConv2dPass, ConvertLayout
 from tvm.relay.backend.contrib.uma.api.utils import PassPhase
 from tvm.relay.backend.contrib.uma.backend import UMABackend
-from codegen import gen_includes
-from patterns import qnn_conv2d_add_pattern
-from strategies import qnn_conv2d_strategy
+from .codegen import gen_includes
+from .patterns import qnn_conv2d_add_pattern
+from .strategies import qnn_conv2d_strategy
 
 
-class VanillaAcceleratorBackend(UMABackend):
-    """UMA backend for the VanillaAccelerator accelerator."""
+class QVanillaAcceleratorBackend(UMABackend):
+    """UMA backend for the QVanillaAccelerator accelerator."""
 
     def __init__(self):
+        print("init!")
         super().__init__()
 
         # Target configuration
@@ -35,6 +36,7 @@ class VanillaAcceleratorBackend(UMABackend):
         # Relay Pattern registration
         self._register_pattern("qnn_conv2d_add", qnn_conv2d_add_pattern())
 
+
         # Relay to Relay function registration
         self._register_relay_pass(PassPhase.PRE_PARTITIONING, ConvertLayout())
 
@@ -42,7 +44,7 @@ class VanillaAcceleratorBackend(UMABackend):
         # Relay to TIR function registration
         self._register_operator_strategy("qnn.conv2d", qnn_conv2d_strategy)
 
-        self._register_tir_pass(PassPhase.TIR_PHASE_0, VanillaAcceleratorConv2dPass())
+        self._register_tir_pass(PassPhase.TIR_PHASE_0, QVanillaAcceleratorConv2dPass())
 
 
         # TIR to runtime function registration
@@ -50,4 +52,4 @@ class VanillaAcceleratorBackend(UMABackend):
 
     @property
     def target_name(self):
-        return "vanilla_accelerator"
+        return "q_vanilla_accelerator"

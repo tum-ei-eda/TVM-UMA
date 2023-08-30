@@ -1,44 +1,18 @@
-/*
-# Licensed to the Apache Software Foundation (ASF) under one
-# or more contributor license agreements.  See the NOTICE file
-# distributed with this work for additional information
-# regarding copyright ownership.  The ASF licenses this file
-# to you under the Apache License, Version 2.0 (the
-# "License"); you may not use this file except in compliance
-# with the License.  You may obtain a copy of the License at
-#
-#   http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing,
-# software distributed under the License is distributed on an
-# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-# KIND, either express or implied.  See the License for the
-# specific language governing permissions and limitations
-# under the License.
-*/
 #include <stdlib.h>
-
-
 #include <stdint.h>
 #include <math.h>
 #include <stdbool.h>
 
 #include <stdio.h>
 
-// TODO(mjklaiber): leverage pragma import_c in the future
 #ifdef __cplusplus
 extern "C"
 #endif
 
-    /*!
-     * \brief Conv2D function for mock-accelerator examples. Limited to same-padded Conv2D with
-     * stride (1,1) and datatype integer. 
-     */
-    int
-    vanilla_accelerator_conv2dnchw(int8_t* q_vanilla_accelerator_0_i0, int8_t* q_vanilla_accelerator_0_i1, int32_t* bias_data, int32_t* compute,
+
+int q_vanilla_accelerator_conv2dnchw(int8_t* q_vanilla_accelerator_0_i0, int8_t* q_vanilla_accelerator_0_i1, int32_t* bias_data, int32_t* compute,
                                       int32_t oc, int32_t iw, int32_t ih, int32_t ic, int32_t kh, int32_t kw, int32_t i_zp, int32_t k_zp) {
 
-  //  *(int32_t**)0x70000000 = 1;
 
   int kw_low = kw / 2;
   int kh_low = kh / 2;
@@ -54,13 +28,14 @@ extern "C"
   int32_t* compute_let = (int32_t*)malloc((oc * ic * kh * kw) * sizeof(int32_t));
 
 
+
   for (int32_t i1_1 = 0; i1_1 < ic; ++i1_1) {
     for (int32_t i2_1 = 0; i2_1 < padded_ih; ++i2_1) {
       for (int32_t i3_1 = 0; i3_1 < padded_iw; ++i3_1) {
         data_pad_let[(((i1_1 * padded_iw * padded_ih) + (i2_1 * padded_iw)) + i3_1)] = (((((kh_low <= i2_1) && (i2_1 < kh_high)) && (kw_low <= i3_1)) && (i3_1 < kw_high)) 
         ? ((int32_t)q_vanilla_accelerator_0_i0[(((i1_1 * iw * ih) + ((i2_1 - kh_low) * iw) + i3_1 - kw_low))] - (i_zp)) 
         : 0);
-
+        
       }
     }
   }
@@ -98,8 +73,8 @@ extern "C"
       }
     }
   }
-
   free(data_pad_let);
   free(compute_let);
   return 0;
 }
+

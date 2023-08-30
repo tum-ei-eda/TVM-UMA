@@ -32,16 +32,7 @@ extern "C"
 
     /*!
      * \brief Conv2D function for mock-accelerator examples. Limited to same-padded Conv2D with
-     * stride (1,1) and datatype float. \param ifmap Pointer to input feature map data of size
-     * iw*ih*ic*sizeof(float). \param weights Pointer to weight data of size
-     * kh*kw*ic**oc*sizeof(float). \param result Pointer to output feature map data of size
-     * iw*ih*oc*sizeof(float). \param oc Number of channels of output feature map. \param iw Width
-     * of input feature map, ifmap. \param ih Height of input feature map, ifmap. \param ic Number
-     * of channels of input feature map. \param kh Height of convolution kernels. \param kw Width of
-     * convolution kernels.
-     *
-     * \return error code
-     *
+     * stride (1,1) and datatype integer. 
      */
     int
     vanilla_accelerator_conv2dnchw(int8_t* q_vanilla_accelerator_0_i0, int8_t* q_vanilla_accelerator_0_i1, int32_t* bias_data, int32_t* compute,

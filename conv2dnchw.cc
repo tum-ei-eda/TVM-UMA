@@ -58,7 +58,7 @@ extern "C"
     for (int32_t i2_1 = 0; i2_1 < padded_ih; ++i2_1) {
       for (int32_t i3_1 = 0; i3_1 < padded_iw; ++i3_1) {
         data_pad_let[(((i1_1 * padded_iw * padded_ih) + (i2_1 * padded_iw)) + i3_1)] = (((((kh_low <= i2_1) && (i2_1 < kh_high)) && (kw_low <= i3_1)) && (i3_1 < kw_high)) 
-        ? ((int32_t)q_vanilla_accelerator_0_i0[((((i1_1 * iw * ih) + (i2_1 * iw)) + i3_1) - kh_high)] - (i_zp)) 
+        ? ((int32_t)q_vanilla_accelerator_0_i0[(((i1_1 * iw * ih) + ((i2_1 - kh_low) * iw) + i3_1 - kw_low))] - (i_zp)) 
         : 0);
 
       }

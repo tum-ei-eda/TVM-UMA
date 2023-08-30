@@ -54,8 +54,6 @@ extern "C"
   int32_t* compute_let = (int32_t*)malloc((oc * ic * kh * kw) * sizeof(int32_t));
 
 
-  // printf("hi from c lib %d\n", oc);
-
   for (int32_t i1_1 = 0; i1_1 < ic; ++i1_1) {
     for (int32_t i2_1 = 0; i2_1 < padded_ih; ++i2_1) {
       for (int32_t i3_1 = 0; i3_1 < padded_iw; ++i3_1) {
@@ -67,11 +65,7 @@ extern "C"
     }
   }
   
-  // printf("input = %ld\n", q_vanilla_accelerator_0_i0[0]);
 
-  // printf("data_pad_let= %ld\n", data_pad_let[17]);
-
-  // ((int32_t*)compile_engine_const_let_1)[0] = 0;
 
   for (int32_t i0 = 0; i0 < oc; ++i0) {
     for (int32_t i1_2 = 0; i1_2 < ic; ++i1_2) {
@@ -104,7 +98,8 @@ extern "C"
       }
     }
   }
-  // printf("output value = %ld\n", compute[0]);
+
   free(data_pad_let);
+  free(compute_let);
   return 0;
 }
